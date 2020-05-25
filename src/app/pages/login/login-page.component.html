@@ -1,0 +1,240 @@
+<!--Login Page Starts-->
+
+
+<section id="login">
+  <div *ngIf="loading" style="display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.2);
+    position: absolute;
+    z-index: 99;">
+    <i style="font-size: 50px" class="fa fa-spinner fa-spin test"></i>
+  </div>
+  <div class="container-fluid">
+    <div class="row full-height-vh m-0">
+      <div class="col-12 d-flex align-items-center justify-content-center">
+        <div class="card" *ngIf="!passwordRecover && !showRegisterForm">
+          <div class="card-content">
+            <div class="card-body login-img">
+              <form [formGroup]="formLogin" (ngSubmit)="onSubmit(formLogin.value)" id="loginForm">
+              <div class="row m-0 bg-white">
+                <div class="col-lg-6 col-md-12 d-lg-block d-none bg-white px-4 m-auto width-100-mobile">
+                  <img
+                    src="../../assets/img/gallery/login.png"
+                    alt=""
+                    class="img-fluid"
+                    width="400"
+                    height="230"
+                  />
+                </div>
+                <div class="col-lg-6 col-md-12 bg-white px-4 pt-3 pb-3" style="display: flex;flex-direction: column;">
+                  <div class="form-group d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title" style="margin:0;">
+                      {{ 'login.header' | translate }}
+                      </h3>
+                    </div>
+                    <div ngbDropdown [placement]="'bottom-left'" style="cursor:pointer;">
+                      <div class="btn" ngbDropdownToggle id="toggleLanguage" style="margin:0;">
+                        <a id="flags-menu">
+                            <span *ngIf="selectedLang == 'de'" class="flag-icon flag-icon-de"></span>
+                            <span *ngIf="selectedLang == 'en'" class="flag-icon flag-icon-en"></span>
+                        </a>
+                      </div>
+                        <ul ngbDropdownMenu>
+                          <li><a class="dropdown-item" style="cursor:pointer;color:#6f6f6f;" (click)="useLanguage('en');"><span class="flag-icon flag-icon-en mr-2"></span>{{ 'login.english' | translate }}</a></li>
+                          <li><a class="dropdown-item" style="cursor:pointer;color:#6f6f6f;" (click)="useLanguage('de');"><span class="flag-icon flag-icon-de mr-2"></span>{{ 'login.german' | translate }}</a></li>
+                        </ul>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <input
+                      type="text"
+                      class="form-control"
+                      placeholder="{{ 'user.usrname' | translate }}" formControlName="username"
+                    />
+                    <small class="text-danger" *ngIf="formLogin.get('username').dirty && formLogin.get('username').invalid">{{ 'login.emailError' | translate }}</small>
+
+                  </div>
+
+                  <div class="form-group position-relative has-icon-right">
+                      <input id="loginPwd" data-lpignore="true"
+                        type="password"
+                        class="form-control mb-3"
+                        placeholder="{{ 'user.pwd' | translate }}" formControlName="password"
+                      />
+                      <div class="form-control-position" style="cursor:pointer;" (click)="changePwdType('login')">
+                        <i [ngClass]="!showPwdLogin ? 'ft-eye' : 'ft-eye-off'"></i>
+                      </div>
+                  </div>
+                  <div class="d-flex justify-content-end mb-2">
+                    <div class="forgot-password-option">
+                      <a (click)="formRecover.reset();passwordRecover = !passwordRecover" class="text-decoration-none text-primary">{{ 'login.pwdForgot' | translate }}</a>
+                    </div>
+                  </div>
+                  <div class="d-flex justify-content-between mt-2">
+                    <div class="recover-pass">
+                      <button class="btn btn-outline-primary" (click)="formRegister.reset(); formRegister.controls['agreedToTerms'].setValue(true);showRegisterForm = !showRegisterForm" type="button">
+                        {{ 'login.register' | translate }}
+                      </button>
+                    </div>
+                    <div class="recover-pass" style="width:120px;">
+                      <button class="btn btn-primary" type="submit" [style.cursor]="!formLogin.valid ? 'not-allowed' : 'pointer'" [disabled]="!formLogin.valid" style="float:right;">
+                        {{ 'login.header' | translate }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+            </div>
+          </div>
+        </div>
+        <div class="card" *ngIf="passwordRecover" style="min-width:30%">
+          <div class="card-content">
+            <div class="card-body login-img">
+              <form [formGroup]="formRecover" (ngSubmit)="onRecoverSubmit(formRecover.value)" id="recoverForm">
+                <div class="row m-0 bg-white">
+                  <div class="col-12 bg-white px-4 pt-3 pb-3" style="display: flex;flex-direction: column;">
+                    <div class="form-group d-flex justify-content-between">
+                      <div>
+                        <h3 class="card-title mb-2">{{ 'recover.recover' | translate }}</h3>
+                        <p class="content-sub-header">{{ 'recover.details1' | translate }}<br/>{{ 'recover.details2' | translate }}</p>
+                      </div>
+                      <div ngbDropdown [placement]="'bottom-left'" style="cursor:pointer;">
+                        <div class="btn" ngbDropdownToggle id="toggleLanguage" style="margin:0;">
+                          <a id="flags-menu">
+                              <span *ngIf="selectedLang == 'de'" class="flag-icon flag-icon-de"></span>
+                              <span *ngIf="selectedLang == 'en'" class="flag-icon flag-icon-en"></span>
+                          </a>
+                        </div>
+                          <ul ngbDropdownMenu>
+                            <li><a class="dropdown-item" style="cursor:pointer;color:#6f6f6f;" (click)="useLanguage('en');"><span class="flag-icon flag-icon-en mr-2"></span>{{ 'login.english' | translate }}</a></li>
+                            <li><a class="dropdown-item" style="cursor:pointer;color:#6f6f6f;" (click)="useLanguage('de');"><span class="flag-icon flag-icon-de mr-2"></span>{{ 'login.german' | translate }}</a></li>
+                          </ul>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <input
+                        type="text"
+                        class="form-control"
+                        placeholder="{{'user.usrname' | translate}}" formControlName="username"
+                      />
+                      <small class="text-danger" *ngIf="formRecover.get('username').dirty && formRecover.get('username').invalid">{{ 'login.emailError' | translate }}</small>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-2">
+                      <div class="recover-pass">
+                        <button class="btn btn-outline-primary" type="button" (click)="formLogin.reset();passwordRecover=!passwordRecover" style="float:right;">
+                          {{ 'recover.back' | translate }}
+                        </button>
+                      </div>
+                      <div class="recover-pass" style="width:120px;">
+                        <button class="btn btn-primary" type="submit" [style.cursor]="!formRecover.valid ? 'not-allowed' : 'pointer'" [disabled]="!formRecover.valid" style="float:right;">
+                          {{ 'general.submit' | translate }}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" *ngIf="showRegisterForm" style="min-width:50%">
+          <div class="card-content">
+            <div class="card-body login-img">
+              <form [formGroup]="formRegister" (ngSubmit)="onRegisterSubmit(formRegister.value)">
+                <div class="row m-0 bg-white">
+                  <div class="col-12 bg-white px-4 pt-3 pb-3" style="display: flex;flex-direction: column;">
+                    <div class="form-group d-flex justify-content-between">
+                      <div>
+                        <h3 class="card-title mb-2">{{ 'login.registerTitle' | translate }}</h3>
+                        <p class="content-sub-header">{{ 'login.registerBody' | translate }}</p>
+                      </div>
+                      <div ngbDropdown [placement]="'bottom-left'" style="cursor:pointer;">
+                        <div class="btn" ngbDropdownToggle id="toggleLanguage" style="margin:0;">
+                          <a id="flags-menu">
+                              <span *ngIf="selectedLang == 'de'" class="flag-icon flag-icon-de"></span>
+                              <span *ngIf="selectedLang == 'en'" class="flag-icon flag-icon-en"></span>
+                          </a>
+                        </div>
+                          <ul ngbDropdownMenu>
+                            <li><a class="dropdown-item" style="cursor:pointer;color:#6f6f6f;" (click)="useLanguage('en');"><span class="flag-icon flag-icon-en mr-2"></span>{{ 'login.english' | translate }}</a></li>
+                            <li><a class="dropdown-item" style="cursor:pointer;color:#6f6f6f;" (click)="useLanguage('de');"><span class="flag-icon flag-icon-de mr-2"></span>{{ 'login.german' | translate }}</a></li>
+                          </ul>
+                      </div>
+                    </div>
+
+
+                    <input
+                      type="text"
+                      class="form-control mb-3"
+                      placeholder="{{'user.name' | translate}}" formControlName="name"
+                    />
+
+
+                    <input
+                      type="text"
+                      class="form-control"
+                      placeholder="{{'user.usrname' | translate}}" formControlName="username"
+                    />
+                    <small class="text-danger" *ngIf="formRegister.get('username').dirty && formRegister.get('username').invalid">{{ 'login.emailError' | translate }}</small>
+
+                    <div class="form-group position-relative mt-3 has-icon-right">
+                      <input id="registerPwd" data-lpignore="true"
+                        type="password"
+                        class="form-control"
+                        placeholder="{{'user.pwd' | translate}}" formControlName="password"
+                      />
+                      <div class="form-control-position" style="cursor:pointer;" (click)="changePwdType('register')">
+                        <i [ngClass]="!showPwd ? 'ft-eye' : 'ft-eye-off'"></i>
+                      </div>
+                    </div>
+                    <div class="form-group position-relative has-icon-right">
+                      <input id="registerRepeatPwd" data-lpignore="true"
+                          type="password"
+                          class="form-control"
+                          placeholder="{{'user.pwdConfirm' | translate}}" formControlName="repeatPwd"
+                        />
+                        <div class="form-control-position" style="cursor:pointer;" (click)="changePwdType('register')">
+                          <i [ngClass]="!showPwd ? 'ft-eye' : 'ft-eye-off'"></i>
+                        </div>
+                        <small class="text-danger" *ngIf="formRegister.get('repeatPwd').invalid">{{ 'login.repeatPwdError' | translate }}</small>
+
+                    </div>
+
+                    <div class="form-group">
+                      <label for="agreedToTerms">
+                      <input type="checkbox" class="validation-field mr-2" name="agreedToTerms" formControlName="agreedToTerms">
+                      {{ 'user.agreedToTerms' | translate }} </label>
+                      <div><small class="text-danger" *ngIf="formRegister.get('agreedToTerms').dirty && formRegister.get('agreedToTerms').invalid">{{ 'login.agreedTotermsError' | translate }}</small></div>
+
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-2">
+                      <div class="recover-pass">
+                        <button class="btn btn-outline-primary" type="button" (click)="formLogin.reset();showRegisterForm=!showRegisterForm" style="float:right;">
+                          {{ 'recover.back' | translate }}
+                        </button>
+                      </div>
+                      <div class="recover-pass" style="width:120px;">
+                        <button class="btn btn-primary" type="submit" [style.cursor]="!formRegister.valid ? 'not-allowed' : 'pointer'" [disabled]="!formRegister.valid" style="float:right;">
+                          {{ 'general.submit' | translate }}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!--Login Page Ends-->

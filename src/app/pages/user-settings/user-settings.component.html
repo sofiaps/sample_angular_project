@@ -1,0 +1,61 @@
+<section id="simple">
+  <div class="row text-left">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="card-title">{{ 'userSettings.title' | translate }}</h4>
+        </div>
+        <div class="card-content">
+          <div class="card-body">
+            <form [formGroup]="newPassword" (ngSubmit)="submitPwd(newPassword.value);">
+              <div class="row">
+                <div class="form-group col-12">
+                  <h4 class="form-section">{{ 'userSettings.personal' | translate }}</h4>
+                </div>
+                <div class="form-group col-xl-8">
+                  <label for="username">{{ 'user.usrname' | translate }}: </label>
+                  <input type="text" class="form-control validation-field" name="username" formControlName="username">
+                </div>
+                <div class="form-group col-xl-8">
+                  <label for="name">{{ 'user.name' | translate }}: </label>
+                  <input type="text" class="form-control validation-field" name="name" formControlName="name">
+                </div>
+
+                <div class="form-group col-12">
+                  <h4 class="form-section">{{ 'userSettings.pwdChange' | translate }}</h4>
+                </div>
+                <div class="form-group col-xl-8">
+                  <div class="position-relative has-icon-right">
+                    <input id="registerPwd" data-lpignore="true"
+                      type="password"
+                      class="form-control"
+                      placeholder="{{'user.pwd' | translate}}" formControlName="password"
+                    />
+                    <div class="form-control-position" style="cursor:pointer;" (click)="changePwdType()">
+                      <i [ngClass]="!showPwd ? 'ft-eye' : 'ft-eye-off'"></i>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group col-xl-8">
+                  <div class="position-relative has-icon-right">
+                  <input id="registerRepeatPwd" data-lpignore="true"
+                      type="password"
+                      class="form-control"
+                      placeholder="{{'user.pwdConfirm' | translate}}" formControlName="repeatPwd"
+                    />
+                    <div class="form-control-position" style="cursor:pointer;" (click)="changePwdType()">
+                      <i [ngClass]="!showPwd ? 'ft-eye' : 'ft-eye-off'"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-actions right">
+                <button type="submit" [style.cursor]= "newPassword.invalid ? 'not-allowed' : 'pointer'" class="btn btn-outline-dark" [disabled]="newPassword.invalid"><i class="fa fa-check-square-o mr-1"></i>{{ 'general.submit' | translate }}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

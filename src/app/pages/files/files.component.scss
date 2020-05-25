@@ -1,0 +1,408 @@
+:host ::ng-deep .ngx-file-drop__content{
+  color:#212529 !important;
+  display:block !important;
+  height:auto !important;
+}
+ ::ng-deep .ngx-file-drop__drop-zone{
+  border:none !important;
+  height:auto !important;
+}
+
+
+.folder {
+  cursor: pointer;
+}
+#searchDocument {
+  width: 0px;
+  -moz-transition: all 1s ease;
+  -webkit-transition: all 1s ease;
+  transition: all 1s ease;
+  float: right;
+}
+#searchDocument.clicked {
+  width: 100%;
+  float: right;
+  display: inline-block;
+}
+#selectDocuBySearch, #selectDocuArrow {
+  visibility: hidden;
+  -moz-transition: all 0.5s ease;
+  -webkit-transition: all 0.5s ease;
+  transition: all 0.5s ease;
+}
+#selectDocuBySearch.manageText, #selectDocuArrow.manageText {
+  visibility: visible;
+  -moz-transition: all 1.5s ease;
+  -webkit-transition: all 1.5s ease;
+  transition: all 1.5s ease;
+}
+.actionDropdown:hover {
+  background-color: black !important;
+  color: white !important;
+}
+.show > .btn-outline-primary.dropdown-toggle {
+  background-color: black !important;
+  color: white !important;
+}
+.btn-outline-dark:disabled {
+    cursor: not-allowed;
+}
+table th{
+  vertical-align:middle;
+}
+:host>>>.ngx-file-drop__content{
+  color:#212529 !important;
+  display:block !important;
+  height:auto !important;
+}
+:host>>>.ngx-file-drop__drop-zone{
+  border:none !important;
+  height:auto !important;
+}
+::ng-deep .accordion > .card:last-of-type{
+  padding-bottom:0 !important;
+  border-bottom: none !important;
+}
+::ng-deep ngb-accordion [role=tabpanel]{
+  padding:0 !important;
+  /* border-top: 1px solid #dee2e6 !important; */
+}
+::ng-deep .accordion > .card .card-header{
+  padding: 0!important;
+}
+::ng-deep .accordion > .card{
+  border-bottom: 1px solid #c7c7c7 !important;
+}
+.switch {
+	position: relative;
+	display: block;
+	vertical-align: top;
+  min-width: 80px;
+  max-width: 80px;
+	height: 22px;
+	padding: 3px;
+	margin: 5px 0px 0px 5px;
+	border-radius: 18px;
+	cursor: pointer;
+	box-sizing:content-box;
+}
+.switch-input {
+	position: absolute;
+	top: 0;
+	left: 0;
+	opacity: 0;
+	box-sizing:content-box;
+}
+.switch-label {
+	position: relative;
+	display: block;
+	height: inherit;
+	font-size: 14px;
+	text-transform: uppercase;
+	background: #eceeef;
+	border-radius: inherit;
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 0 2px rgba(0, 0, 0, 0.15);
+	box-sizing:content-box;
+}
+.switch-label:before, .switch-label:after {
+	position: absolute;
+	top: 50%;
+	margin-top: -.5em;
+	line-height: 1;
+	-webkit-transition: inherit;
+	-moz-transition: inherit;
+	-o-transition: inherit;
+	transition: inherit;
+	box-sizing:content-box;
+}
+.switch-label:before {
+	content: attr(data-off);
+	right: 11px;
+	color: #6f6f6f;
+	text-shadow: 0 1px rgba(255, 255, 255, 0.5);
+}
+.switch-label:after {
+	content: attr(data-on);
+	left: 11px;
+	color: #FFFFFF;
+	text-shadow: 0 1px rgba(0, 0, 0, 0.2);
+	opacity: 0;
+}
+.switch-input:checked ~ .switch-label {
+	background: #45C234;
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15), inset 0 0 3px rgba(0, 0, 0, 0.2);
+}
+.switch-input:checked ~ .switch-label:before {
+	opacity: 0;
+}
+.switch-input:checked ~ .switch-label:after {
+	opacity: 1;
+}
+.switch-handle {
+	position: absolute;
+	top: 4px;
+	left: 4px;
+	width: 20px;
+	height: 20px;
+	background: linear-gradient(to bottom, #FFFFFF 40%, #f0f0f0);
+	background-image: -webkit-linear-gradient(top, #FFFFFF 40%, #f0f0f0);
+	border-radius: 100%;
+	box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
+}
+.switch-handle:before {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin: -6px 0 0 -6px;
+	width: 12px;
+	height: 12px;
+	background: linear-gradient(to bottom, #eeeeee, #FFFFFF);
+	background-image: -webkit-linear-gradient(top, #eeeeee, #FFFFFF);
+	border-radius: 6px;
+	box-shadow: inset 0 1px rgba(0, 0, 0, 0.02);
+}
+.switch-input:checked ~ .switch-handle {
+	left: 60px;
+	box-shadow: -1px 1px 5px rgba(0, 0, 0, 0.2);
+}
+.switch-label, .switch-handle {
+	transition: All 0.3s ease;
+	-webkit-transition: All 0.3s ease;
+	-moz-transition: All 0.3s ease;
+	-o-transition: All 0.3s ease;
+}
+@media (max-width: 500px) {
+  .table th, .table td {
+    padding: 0.2rem !important;
+  }
+  .table {
+    font-size: 13px;
+  }
+  .button-mobile {
+    margin-left: 15px !important;
+    margin-top: 2% !important;
+  }
+  .searchMobile {
+    width: 70% !important;
+  }
+}
+
+.btn:focus{
+  outline:0;
+  box-shadow: none;
+}
+
+.dropdown-item:focus{
+    outline:0;
+    box-shadow: none;
+}
+
+.bd-example-modal-lg .modal-dialog{
+  display: table;
+  position: relative;
+  margin: 0 auto;
+  top: calc(50% - 24px);
+}
+.bd-example-modal-lg .modal-dialog .modal-content{
+  background-color: transparent;
+  border: none;
+}
+
+@media (max-width: 700px) {
+  .first_div {
+    margin: -45px;
+    margin-bottom: -15px;
+  }
+
+  .modal-header h4 {
+    font-size: medium !important;
+    font-weight: 500 !important;
+  }
+
+  .fixedTable{
+    max-width: 100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height: 500px;
+    position: relative;
+    min-height: 380px;
+    /* margin-bottom:6rem; */
+  }
+
+  #table{
+    position: relative;
+    border-collapse: collapse;
+  }
+
+
+  #table td,
+  th {
+    color: #333;
+    padding: .75rem;
+    white-space: unset !important;
+    /* width: 33.33% !important; */
+  }
+
+  #table thead th {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    background: white;
+    /* border-bottom: 1px solid #dee2e6; */
+    /* text-align: center; */
+    padding: 0.75rem;
+  }
+
+  #table tbody td {
+    text-align: left;
+  }
+
+  #table thead td {
+    position: -webkit-sticky; /* for Safari */
+    position: sticky;
+    top: 45px;
+    z-index: 1;
+    /* border-top: 1px solid #dee2e6 !important; */
+    background-color: white;
+  }
+
+
+  #table thead th:first-child {
+    z-index: 1;
+    border-top: none !important;
+    cursor: pointer;
+    white-space: nowrap;
+    background-color: white;
+    /* width: 150px; */
+  }
+
+  #table thead th:nth-child(2) {
+    z-index: 1;
+    border-top: none !important;
+    cursor: pointer;
+    white-space: nowrap;
+    background-color: white;
+    /* width: 150px; */
+  }
+
+  #table thead th:nth-child(3) {
+    /* left: 300px; */
+    z-index: 1;
+    border-top: none !important;
+    cursor: pointer;
+    white-space: nowrap;
+    background-color: white;
+    /* width: 150px; */
+    text-align: right;
+  }
+
+  #table thead td:first-child {
+    z-index: 99999;
+    border-top: none !important;
+    cursor: pointer;
+    white-space: nowrap;
+    background-color: white;
+    /* width: 150px; */
+  }
+
+  #table thead td:nth-child(2) {
+    z-index: 99999;
+    border-top: none !important;
+    cursor: pointer;
+    white-space: nowrap;
+    background-color: white;
+    /* width: 150px; */
+  }
+
+  #table thead td:nth-child(3) {
+    z-index: 99999;
+    border-top: none !important;
+    cursor: pointer;
+    white-space: nowrap;
+    background-color: white;
+    /* width: 150px; */
+  }
+
+  #table tbody th:first-child {
+    position: -webkit-sticky;
+    position: sticky;
+    /* background: #FFF; */
+    font-weight: normal;
+    /* width: 150px; */
+    text-align: center;
+  }
+
+  #table tbody th:nth-child(2) {
+    position: -webkit-sticky;
+    position: sticky;
+    /* background: #FFF; */
+    font-weight: normal;
+    text-align: center;
+    /* width: 150px; */
+  }
+
+  #table tbody th:nth-child(3) {
+    position: -webkit-sticky;
+    position: sticky;
+    /* background: #FFF; */
+    /* width: 150px; */
+    font-weight: normal;
+  }
+
+  #table tbody td:nth-child(3) {
+    text-align: right !important;
+  }
+}
+
+/* TREE */
+
+/* Remove default bullets */
+ul, #dropboxFolder, #myUL {
+  list-style-type: none;
+}
+
+/* Remove margins and padding from the parent ul */
+#dropboxFolder, #myUL {
+  margin: 0;
+  padding: 0;
+}
+
+/* Style the caret/arrow */
+:host /deep/ .caret {
+  cursor: pointer;
+  user-select: none; /* Prevent text selection */
+}
+
+/* Create the caret/arrow with a unicode, and style it */
+:host /deep/ .caret::before {
+  content: "\25B6";
+  color: black;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+/* Rotate the caret/arrow icon when clicked on (using JavaScript) */
+:host /deep/ .caret-down::before {
+  transform: rotate(90deg);
+}
+
+/* Hide the nested list */
+.nested {
+  display: none;
+}
+
+/* Show the nested list when the user clicks on the caret/arrow (with JavaScript) */
+.active {
+  display: block;
+}
+
+
+.sub-tree {
+  margin-left: 2em;
+}
+
+.tree-item {
+  margin-top: 1em;
+  margin-left: 1em;
+}

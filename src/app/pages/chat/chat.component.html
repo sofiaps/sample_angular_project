@@ -1,0 +1,154 @@
+<div>
+  <h4 style="display: flex;align-items: center;">Chat
+  </h4>
+  <p>
+    <small class="text-muted">
+      <i class="mr-1 icon-info" style="cursor:pointer" ></i>
+        Get in contact with every user of the Portal in real time !
+        Share files by picking them through the file dialog, or just drag and drop them in an open Chat Room!
+        Every text message is saved using AES Encryption.
+        Files that are being shared through Chat are saved in the Cloud (using AWS - s3 Buckets).
+        The files are not public. Only users of the portal can have access to each file shared by/with them.
+        Every time a user clicks on the 'Download' icon, a URL assigned only to that specific file is generated.
+        This link is then active for only 15 minutes .
+        That means that in case the URL has been generated but the download process is for whatever reason interrupted,
+        the link will be automatically deactivated. In order for the file to be accessed, a new URL has to be provided.
+    </small>
+  </p>
+</div>
+
+<div class="chat-application" style="position:relative;min-height:300px;">
+  <div [perfectScrollbar] #chatSidebar style="min-height: 100%;position: absolute;" class="chat-sidebar float-left d-none d-sm-none d-md-block d-lg-block">
+    <div class="chat-sidebar-content">
+      <div class="chat-fixed-search p-2">
+        <form>
+          <div class="position-relative has-icon-left">
+            <input class="form-control" [(ngModel)]="searchText" placeholder="{{ 'searchName' | translate }}" [ngModelOptions]="{standalone: true}" type="text">
+            <div class="form-control-position">
+              <i class="ft-user"></i>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div id="users-list" class="list-group position-relative">
+        <div class="users-list-padding">
+          <a class="list-group-item no-border" *ngFor="let contact of contactsService.contacts | chatContacts : searchText; let chatIndex = index;" (click)="SetActive($event, contact.room_id, chatIndex)">
+            <span class="media" style="display: flex;flex-direction: row;width: 100%;">
+              <span class="avatar avatar-md avatar-online">
+                <img class="media-object d-flex mr-3 bg-secondary height-50 rounded-circle" src="assets/img/portrait/medium/avatar.png"
+                  alt="Generic placeholder image">
+                <i></i>
+              </span>
+              <div class="media-body  text-left" style="display: block;flex: 1;overflow: hidden;">
+                <h6 class="list-group-item-heading" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{contact.name}}
+                  <span class="font-small-3 float-right primary" *ngIf="contact.last_msg_time!==null">
+                    <span *ngIf="isToday(contact.last_msg_time)">{{contact.last_msg_time | date: 'shortTime'}}</span>
+                    <span *ngIf="!isToday(contact.last_msg_time)">{{contact.last_msg_time | date: 'dd.MM.yy'}}</span>
+                  </span>
+                </h6>
+                <p class="list-group-item-text text-muted" *ngIf="contact.last_msg" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                  {{contact.last_msg}}
+                  <span class="float-right primary" *ngIf="!!contact.unread">
+                    <span class="badge badge-pill badge-primary">{{contact.unread_counter}}</span>
+                  </span>
+                </p>
+                <p class="list-group-item-text text-muted" *ngIf="!contact.last_msg">
+                  * New conversation *
+                </p>
+              </div>
+            </span>
+          </a>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="chat-name p-2 bg-white" *ngIf="chatIndex!=undefined">
+    <div class="media">
+      <span class="chat-app-sidebar-toggle ft-align-justify font-large-1 mr-2 d-none d-block d-sm-block d-md-none"></span>
+      <div class="media-body text-left">
+        <img src="assets/img/portrait/medium/avatar.png" width="37" class="rounded-circle mr-1" alt="avatar" />
+        <span>{{ activeContact.name }}</span>
+      </div>
+    </div>
+  </div>
+  <section class="chat-app-window" *ngIf="chatIndex==undefined" style="min-height: 300px;flex-direction: column;display: flex;justify-content: center;align-items: center;">
+    <i class="fa fa-commenting-o" style="font-size:50px; margin-bottom:1rem;"></i>
+    <span *ngIf="contactsService.contacts.length>0">Select a Contact</span>
+    <span *ngIf="contactsService.contacts.length==0">There are no contacts available</span>
+  </section>
+  <section class="chat-app-window" *ngIf="chatIndex!=undefined && loadingConversation" style="flex-direction: column;display: flex;justify-content: center;align-items: center;background-color: rgba(0,0,0,0.2);min-height: 300px;">
+    <i style="font-size: 50px" class="fa fa-spinner fa-spin test"></i>
+  </section>
+
+<ng-container *ngIf="chatIndex!==undefined && !loadingConversation">
+  <ngx-file-drop dropZoneLabel="Drop files here" (onFileDrop)="dropped($event)"  (onFileOver)="fileOver($event)" (onFileLeave)="fileLeave($event)" [multiple]="true">
+    <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
+  <section class="chat-app-window" #scrollMe [scrollTop]="scrollMe.scrollHeight" id="chatWindow" *ngIf="chatIndex!==undefined" >
+
+    <div class="chats" style="width: 100%;">
+      <div class="chats">
+        <ng-container *ngFor="let msg of messages">
+          <div class="chat" [ngClass]="msg.user_id==activeContact.id ? 'chat-left' : 'chat-right'">
+            <div class="chat-body">
+                <div class="chat-content" style="white-space:pre">
+                  <p *ngIf="msg.type == 'text'">{{ msg.content }}</p>
+
+                  <div class="text-center" *ngIf="msg.type == 'file'" style="cursor:pointer;" (click)="downloadFile(msg.file_name, msg.file_uuid)">
+                    <i class="ft-download"></i>
+                    <p >{{ msg.file_name }}</p>
+                  </div>
+
+                </div>
+                <div class="text-muted d-flex w-100" [ngClass]="msg.user_id==activeContact.id ? 'justify-content-start' : 'justify-content-end'"  style="margin-bottom:10px;font-size:0.8rem">
+                  <span [ngStyle]="{ 'margin-right': msg.user_id==activeContact.id ? '' : '20px', 'margin-left': msg.user_id==activeContact.id ? '20px' : '' }" *ngIf="isToday(msg.timestamp)">{{msg.timestamp | date: 'shortTime'}}</span>
+                  <span [ngStyle]="{ 'margin-right': msg.user_id==activeContact.id ? '' : '20px', 'margin-left': msg.user_id==activeContact.id ? '20px' : '' }" *ngIf="!isToday(msg.timestamp)">{{msg.timestamp | date: 'dd.MM.yy, h:mm a'}}</span>
+                </div>
+            </div>
+          </div>
+        </ng-container>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="chat-app-form">
+    <form class="chat-app-input row mt-2" style="width: 100%;">
+
+      <fieldset class="form-group position-relative col-12 col-sm-12 col-md-9 col-lg-9 col-xl-10 m-0 px-3">
+        <div *ngIf="filesUploadArray.length==0"  [ngStyle]="{ 'visibility':chatIndex == undefined ? 'hidden' : 'visible' }">
+          <textarea autosize rows="1" type="text" [disabled]="loading" class="form-control" id="iconLeft4" placeholder="Nachricht eingeben" [(ngModel)]="inputChatContent" [ngModelOptions]="{standalone: true}" (keydown)="setInput($event)"  #messageInput ></textarea>
+          <small class="text-muted hidden-on-mobile"> Zeilenumbruch: ⇧ (shift) + ↵ (enter) </small>
+          <div><small class="text-muted hidden-on-mobile"> Nachricht absenden: ↵ (enter)</small></div>
+          <div class="form-control-position control-position-right" (click)="openFileSelector();">
+            <i class="ft-paperclip mr-1"></i>
+          </div>
+        </div>
+
+        <div *ngIf="filesUploadArray.length>0" class="row" style="width:90%">
+          <span *ngFor="let file of filesUploadArray.controls; let i = index" class="col-3 mb-2">
+            <span class="badge badge-secondary" style="display: inline-flex;align-items: center;width:100%;justify-content:space-between;">
+              <span style=" text-overflow: ellipsis;white-space: nowrap;overflow: hidden;">{{file.value.name}}</span>
+              <button type="button" class="close ml-1" aria-label="Close" (click)="removeItem(i)">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </span>
+          </span>
+          <div class="form-control-position control-position-right" (click)="openFileSelector();">
+            <i class="ft-paperclip mr-1"></i>
+          </div>
+        </div>
+      </fieldset>
+      <fieldset class="form-group position-relative has-icon-left col-12 col-sm-12 col-md-3 col-lg-3 col-xl-2 m-0 mobile-send-button">
+        <button type="button" class="btn btn-raised btn-primary px-4" (click)="onAddMessage()" [ngStyle]="{ 'visibility':chatIndex == undefined ? 'hidden' : 'visible' }">
+          <i class="fa fa-paper-plane-o d-block d-xl-inline-block d-lg-none p-0"></i>
+          <span class="d-none d-lg-inline-block ml-1">Absenden</span>
+        </button>
+      </fieldset>
+    </form>
+  </section>
+</ng-template>
+</ngx-file-drop>
+</ng-container>
+
+</div>

@@ -1,0 +1,88 @@
+<section id="login">
+  <div class="container-fluid">
+    <div class="row full-height-vh m-0">
+      <div class="col-12 d-flex align-items-center justify-content-center">
+        <div class="card" style="min-width:50%">
+          <div class="card-content">
+            <div class="card-body login-img">
+              <form [formGroup]="formRecover" (ngSubmit)="onSubmit(formRecover.value)" id="loginForm">
+              <div class="row m-0 bg-white">
+                <div class="col-12 bg-white px-4 pt-3 pb-3" style="display: flex;flex-direction: column;">
+                  <div class="form-group d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title" style="margin:0;">
+                        {{ 'recover.new' | translate }}
+                      </h3>
+                    </div>
+                    <div ngbDropdown [placement]="'bottom-left'" style="cursor:pointer;">
+                      <div class="btn" ngbDropdownToggle id="toggleLanguage" style="margin:0;">
+                        <a id="flags-menu">
+                            <span *ngIf="selectedLang == 'de'" class="flag-icon flag-icon-de"></span>
+                            <span *ngIf="selectedLang == 'en'" class="flag-icon flag-icon-en"></span>
+                        </a>
+                      </div>
+                        <ul ngbDropdownMenu>
+                          <li><a class="dropdown-item" style="cursor:pointer;color:#6f6f6f;" (click)="useLanguage('en');"><span class="flag-icon flag-icon-en mr-2"></span>{{ 'login.english' | translate }}</a></li>
+                          <li><a class="dropdown-item" style="cursor:pointer;color:#6f6f6f;" (click)="useLanguage('de');"><span class="flag-icon flag-icon-de mr-2"></span>{{ 'login.german' | translate }}</a></li>
+                        </ul>
+                    </div>
+                  </div>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    placeholder="{{'recover.username' | translate}}" formControlName="username"
+                    disabled="true"
+                  />
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    placeholder="{{'recover.code' | translate}}" formControlName="code"
+                    disabled="true"
+                  />
+
+                  <div class="form-group">
+                    <div class="position-relative has-icon-right">
+                      <input id="registerPwd" data-lpignore="true"
+                        type="password"
+                        class="form-control"
+                        placeholder="{{'user.pwd' | translate}}" formControlName="password"
+                      />
+                      <div class="form-control-position" style="cursor:pointer;" (click)="changePwdType()">
+                        <i [ngClass]="!showPwd ? 'ft-eye' : 'ft-eye-off'"></i>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <div class="position-relative has-icon-right">
+                    <input id="registerRepeatPwd" data-lpignore="true"
+                        type="password"
+                        class="form-control"
+                        placeholder="{{'user.pwdConfirm' | translate}}" formControlName="repeatPwd"
+                      />
+                      <div class="form-control-position" style="cursor:pointer;" (click)="changePwdType()">
+                        <i [ngClass]="!showPwd ? 'ft-eye' : 'ft-eye-off'"></i>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="d-flex justify-content-between mt-2">
+                    <div class="recover-pass" style="width:120px;">
+                      <button class="btn btn-outline-primary" type="button" (click)="toLogin()" style="float:right;">
+                        {{ 'recover.back' | translate }}
+                      </button>
+                    </div>
+                    <div class="recover-pass" style="width:120px;">
+                      <button class="btn btn-primary" type="submit" [style.cursor]="!formRecover.valid ? 'not-allowed' : 'pointer'" [disabled]="!formRecover.valid" style="float:right;">
+                        {{ 'general.submit' | translate }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

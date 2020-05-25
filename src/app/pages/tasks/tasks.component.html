@@ -1,0 +1,592 @@
+<section id="tasksComponent" style="position:relative">
+  <div *ngIf="!tasksLoaded" style="display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.2);
+    position: absolute;
+    z-index: 99;">
+    <i style="font-size: 50px" class="fa fa-spinner fa-spin test"></i>
+  </div>
+
+  <div class="row first_div">
+    <div class="col-12">
+      <div class="card" >
+        <div class="row">
+          <div class="card-header col-12" style="justify-content:space-between;display:inline-flex;width:100%;">
+            <h4 class="ml-2 card-title">{{ 'Tasks' | translate }}</h4>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <div class="card-content">
+              <div class="card-body">
+                <div style="display: inline-flex;justify-content:flex-end;width: 100%;padding-top: 1em;">
+                  <div class="row" style="width: 100%;margin: 0;justify-content: flex-end;">
+                    <div class="col-12 col-sm-10 col-mb-6 col-lg-7 col-xl-5 col-mobile-search" style="display: inline-flex;width: 100%;justify-content: flex-end;">
+                      <div id="searchDocument">
+                        <div style="display:inline-flex;width: 100%;justify-content: flex-end;">
+                          <div style="width:58%">
+                            <div ngbDropdown style="text-align: end;" placement="bottom-right" [autoClose]="true">
+                              <div id="selectDocuArrow" style="padding: 0.4rem 0.75rem;align-items: center;white-space: nowrap;" ngbDropdownToggle [attr.aria-expanded]="false">
+                                <span id="selectDocuBySearch" style="text-overflow: clip;overflow: hidden;white-space:nowrap;display: inline-flex;cursor:pointer;">{{ searchCodeSelected | translate}}</span>
+                              </div>
+                              <ul style="max-width:100%;list-style:none;" ngbDropdownMenu>
+                                <li data-value="name" [style.cursor]="'pointer'" class="form-control" ngbDropdownItem (click)="checkSearchCheckedCode($event.target)" style="max-width:100%;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;">{{ 'name' | translate}}</li>
+                                <li data-value="due" [style.cursor]="'pointer'" class="form-control" ngbDropdownItem (click)="checkSearchCheckedCode($event.target)" style="max-width:100%;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;">{{ 'due' | translate}}</li>
+                                <li data-value="created_at" [style.cursor]="'pointer'" class="form-control" ngbDropdownItem (click)="checkSearchCheckedCode($event.target)" style="max-width:100%;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;">{{ 'created' | translate}}</li>
+                                <li data-value="list" [style.cursor]="'pointer'" class="form-control" ngbDropdownItem (click)="checkSearchCheckedCode($event.target)" style="max-width:100%;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;">{{ 'status' | translate}}</li>
+                                <li data-value="labels" [style.cursor]="'pointer'" class="form-control" ngbDropdownItem (click)="checkSearchCheckedCode($event.target)" style="max-width:100%;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;">{{ 'label' | translate}}</li>
+                              </ul>
+                            </div>
+                          </div>
+                          <div class="searchMobile" style="float:right;display:inline-flex;" [ngStyle]="{'width' : showDatePicker ? '219.5px' : ((showStatus || showBereichDropdown)  ? '' : '100%')}">
+                            <span style="display:inline-block;width:100%;" *ngIf="!showDatePicker && !showStatus  && !showBereichDropdown">
+                              <input class="form-control" id="docuSearchInput" [(ngModel)]="filterQuery" [ngModelOptions]="{standalone: true}" placeholder="{{ 'searchTask' | translate}}" type="text" style="margin-top: 0px;margin:unset;"/>
+                            </span>
+                            <div>
+                              <ngb-datepicker *ngIf="showDatePicker" #dp [(ngModel)]="filterQuery" (navigate)="date = $event.next" style="position: absolute;background: white;z-index: 9999999;"></ngb-datepicker>
+                              <span style="display:inline-block;width:100%;" *ngIf="showStatus">
+                                <div ngbDropdown style="text-align: end;" placement="bottom-right" [autoClose]="true">
+                                  <button class="btn btn-secondary m-0" style="padding: 0.4rem 0.75rem;align-items: center;white-space: nowrap; margin-right: 1rem !important;" ngbDropdownToggle [attr.aria-expanded]="false">
+                                    <span style="text-overflow: clip;overflow: hidden;white-space:nowrap;display: inline-flex;cursor:pointer;">{{ searchStatusSelected | translate }}</span>
+                                  </button>
+                                  <ul style="list-style:none;" ngbDropdownMenu>
+                                    <li data-value="open" [style.cursor]="'pointer'" class="form-control" ngbDropdownItem (click)="checkStatusSearch($event.target)">{{ 'toDo' | translate }}</li>
+                                    <li data-value="editing" [style.cursor]="'pointer'" class="form-control" ngbDropdownItem (click)="checkStatusSearch($event.target)">{{ 'inProgress' | translate }}</li>
+                                    <li data-value="closed" [style.cursor]="'pointer'" class="form-control" ngbDropdownItem (click)="checkStatusSearch($event.target)">{{ 'done' | translate }}</li>
+                                  </ul>
+                                </div>
+                              </span>
+                              <span style="display:inline-block;width:100%;" *ngIf="showBereichDropdown">
+                                <div ngbDropdown style="text-align: end;" placement="bottom-right" [autoClose]="outside">
+                                  <button class="btn btn-secondary m-0" style="padding: 0.4rem 0.75rem;align-items: center;white-space: nowrap; margin-right: 1rem !important;" ngbDropdownToggle [attr.aria-expanded]="false">
+                                    <span style="text-overflow: clip;overflow: hidden;white-space:nowrap;display: inline-flex;cursor:pointer;">{{ 'select' | translate }}</span>
+                                  </button>
+                                  <ul style="list-style:none;" ngbDropdownMenu>
+                                    <ng-container *ngIf="totalLabels.length>0">
+                                      <li *ngFor="let entry of totalLabels" [attr.data-value]="entry.name" class="form-control" ngbDropdownItem>
+                                        <label><input type="checkbox" (change)="checkBereichSearch($event.target.checked, entry.name)"><span class="ml-2">{{entry.name}}</span></label>
+                                      </li>
+                                    </ng-container>
+                                    <ng-container *ngIf="totalLabels.length==0">
+                                      <li class="form-control" ngbDropdownItem>
+                                        <span style="text-decoration:italic">{{ 'noLabels' | translate }}</span>
+                                      </li>
+                                    </ng-container>
+                                  </ul>
+                                </div>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    <span [style.cursor]="'pointer'" class="input-group-addon search_span" style="z-index:999;display: inline-flex;justify-content: center;align-items: center;background-color: rgb(54,61,71);cursor: pointer;padding: 0.5rem 1rem; border-radius: 0.25rem;" (click)="showDocumentSearch();">
+                      <i *ngIf="!showSearch" style="color:white;" class="fa fa-search"></i>
+                      <i *ngIf="showSearch" style="color:white;font-weight:bold;" class="icon-close"></i>
+                    </span>
+                  </div>
+                  <div class="d-flex justify-content-end" id="addNew">
+                    <button type="button" class="btn" type="button" style="display: flex;align-items: center;background-color: rgb(54,61,71);color:white" (click)="resetForms();open(createTask);">
+                        <i class="icon-plus" ></i>
+                        <span>{{ 'tasks.newTask' | translate }}</span>
+                      </button>
+                  </div>
+                </div>
+              </div>
+              <div class="card-text mb-5 mt-3" *ngIf="tasksLoaded">
+                <section id="taskboard">
+                  <div class="row justify-content-center">
+                    <div class="col-4 mb-3" style="background-color: #f5f7fa;">
+                      <h4 class="ml-2 pt-2 mb-0 pb-2 text-bold-500 text-center" data-placement="bottom" data-toggle="tooltip" ngbTooltip="{{'toDo' | translate}}" style="white-space: nowrap;text-overflow: ellipsis;overflow: hidden;" id="offenLabel">
+                        <i class="ft-list mr-1"></i> {{ 'toDo' | translate }}</h4>
+                      <div class='dragdrop-container' [dragula]='"task-group"' id="toDo" [dragulaModel]='toDos' style="height: 100%;">
+                        <div *ngFor='let todo of toDos | taskFilter : filterQuery : searchCodeBy' [attr.task-id]="todo.id" [attr.list-id]="todo.listId" class="task-card">
+                          <div class="card">
+                            <div class="card-header pb-1">
+                              <div class="w-100 mb-1 text-bold-500  text-left" style="font-size: 1.25rem;font-family: 'Montserrat', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;line-height: 1.15em;">
+                                <span class="primary">
+                                  <i class="ft-paperclip pull-right" *ngIf="todo.attachments.length>0"></i>
+                                  <span>{{todo.name}}
+                                  </span>
+                                </span>
+                                <ng-container *ngIf="todo.labels && todo.labels.length>0">
+                                  <div style="width: 100%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"  [ngbTooltip]="tooltip" data-toggle="tooltip" data-placement="bottom">
+                                    <span *ngFor="let label of todo.labels; let i = index" class="mr-2">
+                                      <small *ngIf="i < 3" class="text-muted" style="font-size:0.9rem;">
+                                        {{label.name}}</small>
+                                    </span>
+                                    <ng-template #tooltip>
+                                      <div *ngFor="let label of todo.labels">{{label.name}}</div>
+                                    </ng-template>
+                                  </div>
+                                </ng-container>
+                              </div>
+                              <div class="w-100 text-right">
+                                <span [style.cursor]="'pointer'" class="input-group-addon mr-1" (click)="resetForms();setEditForm(todo);open(editTask);" data-placement="bottom" data-toggle="tooltip" ngbTooltip="{{'edit' | translate}}" style="z-index:999;display: inline-flex;justify-content: center;align-items: center;cursor: pointer;padding: 0.2rem 0.5rem;border-radius: 0.25rem;">
+                                  <i class="ft-edit cursor-pointer"></i>
+                                </span>
+                                <span [style.cursor]="'pointer'" class="input-group-addon mr-1" (click)="taskToDelete = todo;setDeleteIndex(todo);open(delete);" data-placement="bottom" data-toggle="tooltip" ngbTooltip="{{'delete' | translate}}" style="z-index:999;display: inline-flex;justify-content: center;align-items: center;cursor: pointer;padding: 0.2rem 0.5rem;border-radius: 0.25rem;">
+                                  <i class="ft-trash-2 cursor-pointer"></i>
+                                </span>
+                              </div>
+                            </div>
+                            <div class="card-footer" *ngIf="!!todo.showCreate || (todo.due && todo.due!=='' && !!todo.showDue)">
+                              <div class="w-100 d-flex justify-content-between" *ngIf="!!todo.showCreate">
+                                <span style="display: flex;width: 100%;">
+                                  <span style="max-width: 50%;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">Erstellt am:</span>
+                                  <span class="text-right" style="flex: 1;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">{{todo.created_at | date:'dd.MM.yyyy'}}</span>
+                                </span>
+                              </div>
+                              <div class="w-100 d-flex justify-content-between" *ngIf="todo.due && todo.due!=='' && !!todo.showDue">
+                                <span style="display: flex;width: 100%;">
+                                  <span style="max-width: 50%;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">Fällig am:</span>
+                                  <span class="text-right" [ngClass]="todo.overdue ? 'text-danger' : ''" style="flex: 1;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">{{todo.due | date:'dd.MM.yyyy'}}</span>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                      <div class="col-4 mb-3" style="background-color: #f5f7fa;">
+                        <h4 class="ml-2 pt-2 mb-0 pb-2 text-bold-500 text-center" data-placement="bottom" data-toggle="tooltip" ngbTooltip="{{'inProgress' | translate}}" style="white-space: nowrap;text-overflow: ellipsis;overflow: hidden;">
+                          <i class="ft-trending-up mr-1"></i> {{ 'inProgress' | translate }}</h4>
+                        <div class='dragdrop-container' [dragula]='"task-group"' id="progress" [dragulaModel]='inProgress' style="height: 100%;">
+                          <div *ngFor='let inProcess of inProgress | taskFilter : filterQuery : searchCodeBy' [attr.task-id]="inProcess.id" [attr.list-id]="inProcess.listId" class="task-card">
+                            <div class="card">
+                              <div class="card-header pb-1">
+                                <div class="w-100 mb-1 text-bold-500 text-left" style="font-size: 1.25rem;font-family: 'Montserrat', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;line-height: 1.15em;">
+                                  <span class="info">
+                                    <i class="ft-paperclip pull-right" *ngIf="inProcess.attachments.length>0"></i>
+                                    <span>{{inProcess.name}}
+                                    </span>
+                                  </span>
+                                  <ng-container *ngIf="inProcess.labels && inProcess.labels.length>0">
+                                    <div style="width: 100%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"  [ngbTooltip]="tooltip" data-toggle="tooltip" data-placement="bottom" container="body">
+                                      <span *ngFor="let label of inProcess.labels; let i = index" class="mr-2">
+                                        <small *ngIf="i < 3" class="text-muted" style="font-size:0.9rem;">
+                                          {{label.name}}</small>
+                                      </span>
+                                      <ng-template #tooltip>
+                                        <div *ngFor="let label of inProcess.labels">{{label.name}}</div>
+                                      </ng-template>
+                                    </div>
+                                  </ng-container>
+                                </div>
+                                <div class="w-100 text-right">
+                                  <span [style.cursor]="'pointer'" class="input-group-addon mr-1" (click)="resetForms();setEditForm(inProcess);open(editTask);" container="body" data-placement="bottom" data-toggle="tooltip" ngbTooltip="{{'edit' | translate}}" style="z-index:999;display: inline-flex;justify-content: center;align-items: center;cursor: pointer;padding: 0.2rem 0.5rem;border-radius: 0.25rem;">
+                                    <i class="ft-edit cursor-pointer"></i>
+                                  </span>
+                                  <span [style.cursor]="'pointer'" class="input-group-addon mr-1" (click)="taskToDelete = inProcess;setDeleteIndex(inProcess);open(delete);"  container="body" data-placement="bottom" data-toggle="tooltip" ngbTooltip="{{'delete' | translate}}" style="z-index:999;display: inline-flex;justify-content: center;align-items: center;cursor: pointer;padding: 0.2rem 0.5rem;border-radius: 0.25rem;">
+                                    <i class="ft-trash-2 cursor-pointer"></i>
+                                  </span>
+                                </div>
+                              </div>
+                              <div class="card-footer"  *ngIf="!!inProcess.showCreate || (inProcess.due && inProcess.due!=='' && !!inProcess.showDue)">
+                                <div class="w-100 d-flex justify-content-between" *ngIf="!!inProcess.showCreate">
+                                  <span style="display: flex;width: 100%;">
+                                    <span style="max-width: 50%;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">Erstellt am:</span>
+                                    <span class="text-right" style="flex: 1;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">{{inProcess.created_at | date:'dd.MM.yyyy'}}</span>
+                                  </span>
+                                </div>
+                                <div class="w-100 d-flex justify-content-between" *ngIf="inProcess.due && inProcess.due!=='' && !!inProcess.showDue">
+                                  <span style="display: flex;width: 100%;">
+                                    <span style="max-width: 50%;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">Fällig am:</span>
+                                    <span [ngClass]="inProcess.overdue ? 'text-danger' : ''" class="text-right" style="flex: 1;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">{{inProcess.due | date:'dd.MM.yyyy'}}</span>
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-4 mb-3" style="background-color: #f5f7fa;">
+                        <h4 class="ml-2 pt-2 mb-0 pb-2 text-bold-500 text-center" data-placement="bottom" data-toggle="tooltip" container="body" ngbTooltip="{{ 'done' | translate }}" style="white-space: nowrap;text-overflow: ellipsis;overflow: hidden;">
+                          <i class="ft-check-circle mr-1"></i> {{ 'done' | translate }}</h4>
+                        <div class='dragdrop-container' [dragula]='"task-group"' id="done" [dragulaModel]='completes' style="height: 100%;">
+                          <div *ngFor='let completed of completes | taskFilter : filterQuery : searchCodeBy' [attr.task-id]="completed.id" [attr.list-id]="completed.listId" class="task-card">
+                            <div class="card">
+                              <div class="card-header pb-1">
+                                <div class="w-100 mb-1 text-bold-500  text-left" style="font-size: 1.25rem;font-family: 'Montserrat', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;line-height: 1.15em;">
+                                  <span class="success">
+                                    <i class="ft-paperclip pull-right" *ngIf="completed.attachments.length>0"></i>
+                                    <span>{{completed.name}}
+                                    </span>
+                                  </span>
+                                  <ng-container *ngIf="completed.labels && completed.labels.length>0">
+                                    <div style="width: 100%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"  [ngbTooltip]="tooltip" data-toggle="tooltip" container="body" data-placement="bottom">
+                                      <span *ngFor="let label of completed.labels; let i = index" class="mr-2">
+                                        <small *ngIf="i < 3" class="text-muted" style="font-size:0.9rem;">
+                                          {{label.name}}</small>
+                                      </span>
+                                      <ng-template #tooltip>
+                                        <div *ngFor="let label of completed.labels">{{label.name}}</div>
+                                      </ng-template>
+                                    </div>
+                                  </ng-container>
+                                </div>
+                                <div class="w-100 text-right">
+                                  <span [style.cursor]="'pointer'" class="input-group-addon mr-1" (click)="resetForms();setEditForm(completed);open(editTask);" container="body" data-placement="bottom" data-toggle="tooltip" ngbTooltip="{{'edit' | translate}}" style="z-index:999;display: inline-flex;justify-content: center;align-items: center;cursor: pointer;padding: 0.2rem 0.5rem;border-radius: 0.25rem;">
+                                    <i class="ft-edit cursor-pointer"></i>
+                                  </span>
+                                  <span [style.cursor]="'pointer'" class="input-group-addon mr-1" (click)="taskToDelete = completed;setDeleteIndex(completed);open(delete);"  container="body" data-placement="bottom" data-toggle="tooltip" ngbTooltip="{{'delete' | translate}}" style="z-index:999;display: inline-flex;justify-content: center;align-items: center;cursor: pointer;padding: 0.2rem 0.5rem;border-radius: 0.25rem;">
+                                    <i class="ft-trash-2 cursor-pointer"></i>
+                                  </span>
+                                </div>
+                              </div>
+                              <div class="card-footer" *ngIf="!!completed.showCreate || (completed.due && completed.due!=='' && !!completed.showDue)">
+                                <div class="w-100 d-flex justify-content-between" *ngIf="!!completed.showCreate">
+                                  <span style="display: flex;width: 100%;">
+                                    <span style="max-width: 50%;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">{{ 'created' | translate }}:</span>
+                                    <span class="text-right" style="flex: 1;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">{{completed.created_at | date:'dd.MM.yyyy'}}</span>
+                                  </span>
+                                </div>
+                                <div class="w-100 d-flex justify-content-between"  *ngIf="completed.due && completed.due!=='' && !!completed.showDue">
+                                  <span style="display: flex;width: 100%;">
+                                    <span style="max-width: 50%;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">{{ 'due' | translate }}:</span>
+                                    <span class="text-right" [ngClass]="completed.overdue ? 'text-danger' : ''" style="flex: 1;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">{{completed.due | date:'dd.MM.yyyy'}}</span>
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+<ng-template #createTask let-modal >
+  <div (click)="outOfLabels($event)">
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">{{ 'tasks.newTask' | translate }}</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.close('close')" style="outline-style: none;">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <form [formGroup]="tasksForm" (ngSubmit)="newAufgabe(tasksForm.value);modal.close('close');">
+    <div class="modal-body">
+        <div class="form-group">
+            <label for="sachbereich">{{ 'name' | translate }}: </label>
+          <input type="text" class="form-control validation-field" name="name" formControlName="name">
+        </div>
+        <div class="row">
+          <div class="form-group col-6">
+            <label for="due">{{ 'status' | translate }}: </label>
+              <div ngbDropdown placement="bottom-left" [autoClose]="true" class="form-control" style="cursor: pointer;">
+                <div style="align-items: center;white-space: nowrap;align-items: center;display: inline-flex;justify-content: space-between;width: 100%;" ngbDropdownToggle [attr.aria-expanded]="false">
+                  <span style="text-overflow: clip;overflow: hidden;white-space:nowrap;display: inline-flex;cursor:pointer;">
+                    <span *ngIf = "!statusSelected">{{ 'select' | translate }}</span>
+                    <span *ngIf = "statusSelected">{{selectedStatus}}</span>
+                  </span>
+                </div>
+                <ul style="min-width:50%;list-style:none;" ngbDropdownMenu>
+                    <li [style.cursor]="'pointer'" ngbDropdownItem (click)="setStatus($event.target)" data-value="To Do" data-board="toDo">
+                      {{ 'toDo' | translate }}
+                    </li>
+                    <li [style.cursor]="'pointer'" ngbDropdownItem (click)="setStatus($event.target)" data-value="Doing" data-board="progress">
+                      {{ 'inProgress' | translate }}
+                    </li>
+                    <li [style.cursor]="'pointer'" ngbDropdownItem (click)="setStatus($event.target)" data-value="Done" data-board="done">
+                      {{ 'done' | translate }}
+                    </li>
+                </ul>
+              </div>
+          </div>
+          <div class="form-group col-6">
+            <label for="due">{{ 'due' | translate }}: </label>
+            <div class="input-group">
+              <div style="display:flex;width:100%;flex-flow:row;">
+                <div class="input-group m-0"  style="width:unset;flex-grow:1;">
+                  <input name="due" [(ngModel)]="model1" (click)="f.toggle()" [readonly]="true"  class="form-control bg-transparent border-right-0" formControlName="due" ngbDatepicker #f="ngbDatepicker" [autoClose]="true">
+
+                  <span class="input-group-append" style="width:unset;border: 1px solid #A6A9AE;cursor:pointer;" *ngIf="tasksForm.controls['due'].value">
+                      <span class="input-group-text bg-transparent border-0" (click)="tasksForm.controls['due'].setValue(null)">
+                        <i class="fa fa-times"></i></span>
+                  </span>
+                </div>
+                <div class="input-group-append" style="width:50px;">
+                  <button class="form-control btn btn-outline-secondary mb-0" (click)="f.toggle()" type="button"><i class="fa fa-calendar"></i></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group d-flex align-items-center justify-content-center">
+          <label style="margin: 0;display: flex;align-items: center;flex-grow:1">{{ 'tasks.showCreateDate' | translate }}: </label>
+          <label class="switch m-0" >
+            <input class="switch-input" type="checkbox" formControlName="showCreate"/>
+            <span class="switch-label" [attr.data-on]="'Ja'" [attr.data-off]="'Nein'"></span>
+            <span class="switch-handle"></span>
+          </label>
+        </div>
+        <div class="form-group d-flex align-items-center justify-content-center" *ngIf="tasksForm.controls['due'].value">
+          <label style="margin: 0;display: flex;align-items: center;flex-grow:1">{{ 'tasks.showDueDate' | translate }}: </label>
+          <label class="switch m-0" >
+            <input class="switch-input" type="checkbox" formControlName="showDue"/>
+            <span class="switch-label" [attr.data-on]="'Ja'" [attr.data-off]="'Nein'"></span>
+            <span class="switch-handle"></span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label for="bezeichnung">{{ 'tasks.description' | translate }}: </label>
+          <textarea rows="10" class="form-control validation-field" name="description" formControlName="description"></textarea>
+        </div>
+
+      <div class="form-group">
+        <span>
+          <label for="sachbereich">{{ 'tasks.attachments' | translate }}: </label>
+
+          <label for="createAttachments">
+          <input style="width:0px; visibility:hidden;" id="createAttachments" type="file" multiple (change)="uploadTaskCreate($event.target.files)">
+            <span class="ml-3 input-group-addon" data-placement="bottom" container="body" ngbTooltip="{{'attach' | translate}}" style="display: inline-flex;justify-content: center;align-items: center;cursor: pointer;padding: 0.3rem 0.3rem;border-radius: 0.25rem;font-size:1rem">
+              <i class="ft-paperclip"></i>
+            </span>
+          </label>
+        </span>
+
+        <div *ngIf="filesCreateArray.length==0">
+          <small style="font-style:italic;color: #939699;">{{ 'tasks.noAttachments' | translate }}</small>
+        </div>
+        <table class="table text-center table-responsive" formArrayName="attachments">
+            <tbody style="display:table;border:none;width:100%">
+                <tr *ngFor="let item of createAttachmentGroup?.controls; let a = index;"  [formGroupName]="a">
+                    <td style="border:none;width:80%;text-align:left;">
+                      <span  style="width:100%; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">
+                        {{item.value.name}}</span>
+                    </td>
+                    <td style="border:none;width:20%;text-align:left">
+                      <span (click)="removeAttachment(a)" style="cursor:pointer;"><i class="ft-x-circle pl-1 pr-1"></i></span>
+                    </td>
+                </tr>
+            </tbody>
+          </table>
+      </div>
+          <div class="form-group">
+            <label for="bezeichnung">{{ 'tasks.labels' | translate }}: </label>
+            <div class="form-group" id="labelsGroup">
+                <div class="input-group mb-0">
+                  <input id="bereichSearch" style="border-right: none;" class="form-control" type="text" [(ngModel)]="searchText" placeholder="{{ 'searchLabel' | translate }}" [ngModelOptions]="{standalone: true}">
+                  <span class="input-group-prepend" style="border: 1px solid #A6A9AE;border-left: none;border-top-right-radius: 0.25rem;border-bottom-right-radius: 0.25rem;">
+                      <span class="input-group-text bg-transparent border-0">
+                        <i class="ft-search ml-2 mr-1"></i>
+                      </span>
+                  </span>
+                </div>
+                <ul class="list-group" *ngIf="showLabels" style="max-height: 200px;overflow: auto;">
+                   <ng-container *ngFor="let label of totalLabels | SearchLabel  : labelsCreateArray.value : searchText; let i=index;">
+                    <li class="list-group-item d-flex w-100 align-items-center pr-0 pl-0">
+                      <div class="d-flex w-100 justify-content-between" [style.cursor]="'pointer'" (click)="createLabel(label)" style="cursor:pointer;">
+                        <span style="display:inline-block;margin: 0 1rem;">{{label['name']}}<strong *ngIf="!label['id']"> ({{ 'new' | translate }})</strong></span>
+                        <span><i class="ft-plus-circle text-dark mr-3"></i></span>
+                      </div>
+                    </li>
+                  </ng-container>
+                </ul>
+            </div>
+            <div class="form-group" formArrayName="labels" *ngIf="this.labelsCreateArray.length>0">
+              <span *ngFor="let label of createLabelGroup.controls; let t=index;" class="badge badge-dark" style="margin-right: 1rem;">
+                {{label.value.name}}
+                <i class="fa fa-times" style="padding-left: 0.5rem;cursor: pointer;" (click)="removeLabel(t);"></i>
+              </span>
+            </div>
+          </div>
+      </div>
+      <div class="modal-footer" style="justify-content:space-between;">
+        <button type="button" class="btn btn-outline-dark" (click)="modal.close('close')">{{ 'general.cancel' | translate }}</button>
+        <button type="submit" class="btn btn-outline-dark" [disabled]="tasksForm.invalid">{{ 'general.save' | translate }}</button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+
+<ng-template #editTask let-modal>
+<div  (click)="outOfLabelsEdit($event)" (touchend)="outOfLabelsEdit($event)">
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{ 'tasks.editTask' | translate }}</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.close('close')" style="outline-style: none;">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <form [formGroup]="taskEditForm" (ngSubmit)="putAufgabe(taskEditForm.value);modal.close('close');">
+  <div class="modal-body">
+    <div class="form-group">
+      <label for="sachbereich">{{ 'name' | translate }}: </label>
+      <input type="text" class="form-control validation-field" name="name" formControlName="name">
+    </div>
+    <div class="row">
+      <div class="form-group col-6">
+        <label for="due">{{ 'status' | translate }}: </label>
+        <div ngbDropdown placement="bottom-left" [autoClose]="true" class="form-control" style="cursor: pointer;">
+          <div style="align-items: center;white-space: nowrap;align-items: center;display: inline-flex;justify-content: space-between;width: 100%;" ngbDropdownToggle [attr.aria-expanded]="false">
+            <span style="text-overflow: clip;overflow: hidden;white-space:nowrap;display: inline-flex;cursor:pointer;">
+              <span *ngIf = "!statusSelected">{{ 'select' | translate }}</span>
+              <span *ngIf = "statusSelected">{{selectedStatus}}</span>
+            </span>
+          </div>
+          <ul style="min-width:50%;list-style:none;" ngbDropdownMenu>
+              <li [style.cursor]="'pointer'" ngbDropdownItem (click)="setStatus($event.target, 'edit')" data-value="To Do" data-board="toDo">
+                {{ 'toDo' | translate }}
+              </li>
+              <li [style.cursor]="'pointer'" ngbDropdownItem (click)="setStatusEdit($event.target)" data-value="Doing" data-board="progress">
+                {{ 'inProgress' | translate }}
+              </li>
+              <li [style.cursor]="'pointer'" ngbDropdownItem (click)="setStatus($event.target, 'edit')" data-value="Done" data-board="done">
+                {{ 'done' | translate }}
+              </li>
+          </ul>
+        </div>
+      </div>
+      <div class="form-group col-6">
+        <label for="due">{{ 'due' | translate }}: </label>
+        <div class="input-group">
+          <div style="display:flex;width:100%;flex-flow:row;">
+            <div class="input-group m-0"  style="width:unset;flex-grow:1;">
+              <input name="due" [(ngModel)]="editDate" (click)="d.toggle()" [readonly]="true"  class="form-control bg-transparent border-right-0" formControlName="due" ngbDatepicker #d="ngbDatepicker" [autoClose]="true">
+              <span class="input-group-append" style="width:unset;border: 1px solid #A6A9AE;cursor:pointer;" *ngIf="taskEditForm.controls['due'].value">
+                  <span class="input-group-text bg-transparent border-0" (click)="taskEditForm.controls['due'].setValue(null)">
+                    <i class="fa fa-times"></i></span>
+              </span>
+            </div>
+            <div class="input-group-append" style="width:50px;">
+              <button class="form-control btn btn-outline-secondary mb-0" (click)="d.toggle()" type="button"><i class="fa fa-calendar"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group d-flex align-items-center justify-content-center">
+      <label style="margin: 0;display: flex;align-items: center;flex-grow:1">{{ 'tasks.showCreateDate' | translate }}: </label>
+      <label class="switch m-0" >
+        <input class="switch-input" type="checkbox" formControlName="showCreate"/>
+        <span class="switch-label" [attr.data-on]="'Ja'" [attr.data-off]="'Nein'"></span>
+        <span class="switch-handle"></span>
+      </label>
+    </div>
+    <div class="form-group d-flex align-items-center justify-content-center" *ngIf="taskEditForm.controls['due'].value">
+      <label style="margin: 0;display: flex;align-items: center;flex-grow:1">{{ 'tasks.showDueDate' | translate }}: </label>
+      <label class="switch m-0" >
+        <input class="switch-input" type="checkbox" formControlName="showDue"/>
+        <span class="switch-label" [attr.data-on]="'Ja'" [attr.data-off]="'Nein'"></span>
+        <span class="switch-handle"></span>
+      </label>
+    </div>
+
+    <div class="form-group">
+      <label for="bezeichnung">{{ 'tasks.description' | translate }}: </label>
+      <textarea rows="10" class="form-control validation-field" name="description" formControlName="description"></textarea>
+    </div>
+
+    <div class="form-group">
+      <span>
+        <label>{{ 'tasks.attachments' | translate }}: </label>
+        <label for="editAttachments">
+        <input style="width:0px; visibility:hidden;" id="editAttachments" type="file" multiple (change)="uploadTaskEdit($event.target.files)">
+          <span class="ml-3 input-group-addon" data-placement="bottom" container="body" ngbTooltip="{{'attach' | translate}}" style="display: inline-flex;justify-content: center;align-items: center;cursor: pointer;padding: 0.3rem 0.3rem;border-radius: 0.25rem;font-size:1rem">
+            <i class="ft-paperclip"></i>
+          </span>
+        </label>
+      </span>
+
+      <div *ngIf="filesEditArray.length==0">
+        <small style="font-style:italic;color: #939699;">{{ 'tasks.noAttachments' | translate }}</small>
+      </div>
+      <table *ngIf="filesEditArray.length>0" class="table text-center table-responsive" formArrayName="attachments">
+          <tbody style="display:table;border:none;width:100%">
+              <tr *ngFor="let item of editAttachmentGroup?.controls; let a = index;"  [formGroupName]="a">
+                  <td style="border:none;width:80%;text-align:left;">
+                    <span  style="width:100%; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">
+                      {{item.value.name}}</span>
+                  </td>
+                  <td style="border:none;width:6.66%;text-align:left">
+                    <a  *ngIf="item.value.url && item.value.url!==''" target="_blank" [href]="item.value.url" data-placement="bottom" container="body" ngbTooltip="{{'newTab'|translate}}" style="cursor:pointer;color:#212529;">
+                      <i class="ft-arrow-up-right pl-1 pr-1"></i>
+                    </a>
+                  </td>
+                  <td style="border:none;width:6.66%;text-align:left">
+                    <span  *ngIf="item.value.url && item.value.url!==''" [style.cursor]="'pointer'" (click)="downloadAttachment(item.value.url, item.value.name)" data-placement="bottom" ngbTooltip="{{'download'|translate}}" container="body" style="cursor:pointer;">
+                      <i class="ft-download pl-1 pr-1"></i>
+                    </span>
+                  </td>
+                  <td style="border:none;text-align:left">
+                    <span data-placement="bottom" [style.cursor]="'pointer'" ngbTooltip="{{'deleteFile'|translate}}" (click)="removeAttachmentEdit(a, item.value)" style="cursor:pointer;">
+                      <i class="ft-x-circle pl-1 pr-1"></i></span>
+                  </td>
+              </tr>
+          </tbody>
+        </table>
+    </div>
+
+    <div class="form-group">
+      <label for="bezeichnung">{{ 'tasks.labels' | translate }}: </label>
+      <div class="form-group" id="labelsGroup2">
+          <div class="input-group mb-0">
+            <input id="bereichSearch2" style="border-right: none;" class="form-control" type="text" [(ngModel)]="searchText" placeholder="{{ 'searchLabel' | translate }}" [ngModelOptions]="{standalone: true}">
+            <span class="input-group-prepend" style="border: 1px solid #A6A9AE;border-left: none;border-top-right-radius: 0.25rem;border-bottom-right-radius: 0.25rem;">
+                <span class="input-group-text bg-transparent border-0">
+                  <i class="ft-search ml-2 mr-1"></i>
+                </span>
+            </span>
+          </div>
+          <ul class="list-group" *ngIf="showLabelsEdit" style="max-height: 200px;overflow: auto;">
+             <ng-container *ngFor="let label of totalLabels | SearchLabel  : labelsEditArray.value : searchText; let i=index;">
+              <li class="list-group-item d-flex w-100 align-items-center pr-0 pl-0">
+                <div class="d-flex w-100 justify-content-between" [style.cursor]="'pointer'" (click)="createEditLabel(label)" style="cursor:pointer;">
+                  <span style="display:inline-block;margin: 0 1rem;">{{label['name']}}<strong *ngIf="!label['id']"> ({{ 'new' | translate }})</strong></span>
+                  <span><i class="ft-plus-circle text-dark mr-3"></i></span>
+                </div>
+              </li>
+            </ng-container>
+          </ul>
+      </div>
+      <div class="form-group" formArrayName="labels" *ngIf="this.labelsEditArray.length>0">
+        <span *ngFor="let label of editLabelGroup.controls; let t=index;" class="badge badge-dark" style="margin-right: 1rem;">
+          {{label.value.name}}
+          <i class="fa fa-times" style="padding-left: 0.5rem;cursor: pointer;" (click)="removeLabelEdit(t);"></i>
+        </span>
+      </div>
+    </div>
+
+
+  </div>
+  <div class="modal-footer" style="justify-content:space-between;">
+    <button type="button" class="btn btn-outline-dark" (click)="modal.close('close')">{{ 'general.cancel' | translate }}</button>
+    <button type="submit" class="btn btn-outline-dark" [disabled]="taskEditForm.invalid">{{ 'general.save' | translate }}</button>
+  </div>
+  </form>
+</div>
+</ng-template>
+
+
+<ng-template #delete let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{ 'delete' | translate }} {{taskToDelete.name}}</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.close('close')" style="outline-style: none;">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    {{ 'tasks.confirmDelete' | translate }}
+  </div>
+  <div class="modal-footer" style="justify-content:space-between;">
+    <button type="button" class="btn btn-outline-dark" (click)="modal.close('close')">{{ 'general.cancel' | translate }}</button>
+    <button type="button" class="btn btn-outline-dark" (click)="deleteTask(taskToDelete);modal.close('close')">{{ 'general.delete' | translate }}</button>
+  </div>
+</ng-template>

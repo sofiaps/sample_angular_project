@@ -1,0 +1,399 @@
+<section id="filesComponent" style="position:relative">
+  <div>
+    <p>
+      <small class="text-muted">
+        <i class="mr-1 icon-info" style="cursor:pointer" ></i>
+        Manage your files with Sample Angular App ! 
+        Upload with dialog or Drag & Drop, edit your files, create and edit folders and preview your PDF's.
+        Files that are being shared through the Portal are saved in the Cloud (using AWS - s3 Buckets).
+        The files are not public. Only you can have access to each file shared by/with them.
+        Every time you clicks on 'Download', a URL assigned only to that specific file is generated.
+        This link is then active for only 15 minutes .
+        That means that in case the URL has been generated but the download process is for whatever reason interrupted,
+        the link will be automatically deactivated. In order for the file to be accessed, a new URL has to be provided.
+      </small>
+    </p>
+  </div>
+
+  <div *ngIf="zipLoaded" style="position: absolute;display: flex;justify-content: center;align-items: center;width: 100%;height: 100%;z-index: 999999;background:rgba(0,0,0,0.15);"><i style="font-size: 50px;" class="fa fa-spinner fa-spin test"></i></div>
+<div class="row first_div">
+  <div class="col-12">
+    <div class="card" >
+      <div class="row">
+        <div class="card-header col-12" style="justify-content:space-between;display:inline-flex;width:100%;">
+          <h4 class="ml-2 card-title">{{ 'Files' | translate }}</h4>
+        </div>
+      </div>
+      <div class="card-body">
+
+          <ngx-file-drop dropZoneLabel="Drop files here" (onFileDrop)="dropped($event)" multiple="true">
+          <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector" >
+        <div class="row">
+          <div class="col-12">
+            <div class="row">
+              <div class="col-12">
+                <button type="button" id="uploadBtn" class="btn btn-secondary mr-2" style="cursor: pointer;background-color: rgb(54,61,71)" (click)="documentsUpload = []; resetFiles(); uploadFilesForm.reset(); openFileSelector();"> Dokument hochladen</button>
+                <button type="button" class="btn btn-secondary mr-2" style="cursor: pointer;background-color: rgb(54,61,71);" (click)="folderToEditName=''; setInitFolders(); open(create);"> Ordner erstellen</button>
+              </div>
+            </div>
+          </div>
+          <div [ngClass]="showPDFPreview ? 'col-6' : 'col-12'">
+            <div class="card-content">
+              <div class="card-body">
+                <div class="row mt-3 mb-2">
+                  <div class="col-12">
+                    <span *ngFor="let crumb of breadcrumb; let x = index" (click)="changeTable(crumb, x)" style="cursor: pointer">
+                      <i style="color: black;" class="fa fa-home" *ngIf="x == 0"></i> {{crumb.name}} <span *ngIf="x != breadcrumb.length - 1">></span>
+                    </span>
+                  </div>
+                </div>
+                <div class="table-responsive" style="min-height: 400px;">
+                  <table class="table" [mfData]="documents" #mf="mfDataTable" [mfRowsOnPage]="20">
+                      <thead style="border-bottom: 3px solid #c7c7c7">
+                        <tr>
+                          <th style="border-top: none;">
+                            <mfDefaultSorter by="name">
+                              Name
+                            </mfDefaultSorter>
+                          </th>
+                          <th style="border-top: none;">
+                            <mfDefaultSorter by="type">
+                              Type
+                            </mfDefaultSorter>
+                          </th>
+                          <th style="border-top: none;">
+                            <mfDefaultSorter by="size">
+                              Size
+                            </mfDefaultSorter>
+                          </th>
+                          <th style="border-top: none;">
+                            <mfDefaultSorter by="create_date">
+                              Created at
+                            </mfDefaultSorter>
+                          </th>
+                          <th style="border-top: none;text-align:center">
+                            Actions
+                          </th>
+                        </tr>
+                        <tr>
+                          <td style="vertical-align: middle;">
+                            <input type="text" class="form-control" (input)="filterTable($event.target.value, 'name')"/>
+                          </td>
+                          <td style="vertical-align: middle;">
+                            <input type="text" class="form-control" (input)="filterTable($event.target.value, 'type')"/>
+                          </td>
+                          <td style="vertical-align: middle;">
+                            <input type="text" class="form-control" (input)="filterTable($event.target.value, 'size')"/>
+                          </td>
+                          <td style="vertical-align: middle;">
+                            <div style="width:100%;">
+                              <div class="input-group m-0">
+                                       <div style="width:100%;">
+                                         <div class="input-group m-0" style="">
+                              <div class="position-relative has-icon-right" style="display: inline-flex;border-bottom: 1px solid #ced4da;border-top: 1px solid #ced4da;">
+                                <input class="form-control" placeholder="Select Date"
+                                       name="dp1" (dateSelect)="onDateSelection1($event);"
+                                       ngbDatepicker #datepicker1="ngbDatepicker" [(ngModel)]="model1"
+                                       [placement]="'bottom'" style="border: 1px solid #ced4da;border-right: none;border-top: none;border-bottom: none;width: 100%;">
+                                <div class="form-control-position" style="display: flex;align-items: center;padding-right: 0.5rem;">
+                                  <i class="ft-x" *ngIf="model1" (click)="resetEntryDate();model1=null"></i>
+                                </div>
+                              </div>
+                                <div class="input-group-append">
+                                  <button class="btn btn-outline-secondary icon-calendar" style="border-color:#ced4da" (click)="toDateSelected1=false;datepicker1.toggle()" type="button"></button>
+                                </div>
+                              </div>
+                            </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td style="vertical-align: middle;">
+                          </td>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        <tr *ngFor="let file of mf.data; let i = index" style="border-top: 1px solid #dee2e6" [class.folder]="file.type == 'dir'" (click)="clickOnRow(file, i, $event)">
+                          <td>
+                            <span style="white-space:nowrap;" >
+                              <span *ngIf="file.type == 'dir'" style="margin-right: 5px"><i style="color:black;" class="fa fa-folder"></i></span>
+                            <span *ngIf="file.type != 'dir'" style="margin-right: 5px"><i style="color:black;" class="fa fa-file-o"></i></span>
+                            {{file.name}}</span>
+                          </td>
+                          <td>
+                            <span>{{file.type || ''}}</span>
+                          </td>
+                          <td>
+                            <span>{{file.size}}</span>
+                          </td>
+                          <td>
+                            <span>{{file.create_date | date: 'dd.MM.yyyy HH:mm'}}</span>
+                          </td>
+                          <td  style="border-top:none;display: flex;justify-content: center;">
+                            <div ngbDropdown placement="left-top">
+                                <button class="btn mr-1 actionDropdown actionDropdown2" id="actionDropdown-{{i}}" style="color: black; border-color: black;" ngbDropdownToggle>Aktion</button>
+                                <div ngbDropdownMenu class="actions actionDropdown2" style="margin-bottom: 1rem;">
+                                  <button *ngIf="file.type != 'dir'" class="dropdown-item actionDropdown2" (click)="getTokenCreateUrl(file, true);"><i style="color:black;margin-right: 0.5rem;" class="fa fa-download dropdown-icon actionDropdown2"></i> Download</button>
+                                  <button class="dropdown-item actionDropdown2" (click)="open(delete); fileToBeDeleted = file;"><i style="color:black;margin-right: 0.5rem;" class="fa fa-trash dropdown-icon actionDropdown2"></i> Löschen</button>
+                                  <button *ngIf="file.type != 'dir'" id="editDocu" class="actionDropdown2 dropdown-item" (click)="setEditDocu(file);open(edit);"><i style="color:black;margin-right: 0.5rem;" class="actionDropdown2 fa fa-pencil dropdown-icon"></i> Bearbeiten</button>
+                                  <button *ngIf="file.type == 'dir'" id="editFolder" class="actionDropdown2 dropdown-item" (click)="setEditFolder(file);open(editFolder);"><i style="color:black;margin-right: 0.5rem;" class="actionDropdown2 fa fa fa-pencil dropdown-icon"></i> Bearbeiten</button>
+                                  <button *ngIf="file.type == 'application/pdf'" class="actionDropdown2 dropdown-item" (click)="selectedPDFFile=''; selectedPDFFileContent = ''; setFile(file);"><i style="color:black;margin-right: 0.5rem;" class="actionDropdown2 fa fa-search-plus dropdown-icon"></i> Vorschau</button>
+                                </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+
+                        <tfoot style="border-top: 3px solid #c7c7c7;">
+                          <tr>
+                            <td colspan="7" style="padding: 0.75rem 0rem;">
+                              <mfBootstrapPaginator [rowsOnPageSet]="[20,50,100]"></mfBootstrapPaginator>
+                            </td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            <div *ngIf="showPDFPreview" class="col-6">
+              <div class="card-content">
+                <div class="card-body">
+                  <div class="card-text">
+                    <div class="row mb-1">
+                      <div class="col-md-12">
+                        <div style="display: inline-flex;width: 100%;padding-top: 1em; justify-content: flex-end;">
+                            <div class="input-group-addon" style="z-index:999;display: inline-block;background-color: rgb(54,61,71);cursor: pointer;padding: 0.5rem 1rem; border-radius: 0.25rem;" (click)="showPDFPreview = false;">
+                              <i class="fa fa-times" style="color: white"></i>
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body pt-2">
+                <div class="card-text">
+                  <ngx-extended-pdf-viewer [src]="selectedPDFFile" useBrowserLocale="true" height="90vh"></ngx-extended-pdf-viewer>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          </ng-template>
+        </ngx-file-drop>
+      </div>
+      </div>
+    </div>
+</div>
+</section>
+
+
+
+
+<ng-template #upload let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{filesUploadArray.value.length>1 ? 'Dokumente hochladen' : 'Dokument hochladen'}}</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.close('close');resetFiles();" style="outline-style: none;">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <form [formGroup]="uploadFilesForm" (ngSubmit)="checkExistingFiles(uploadFilesForm.value.files);modal.close('close');" autocomplete="off">
+  <div class="modal-body">
+      <ngb-accordion [closeOthers]="true" [type]="warning" activeIds="file-0" formArrayName="files">
+        <div *ngFor="let entry of itemsFormGroup.controls; let i = index;" style="padding-bottom:1.5rem;">
+          <ngb-panel id="file-{{i}}" [formGroupName]="i">
+            <ng-template ngbPanelHeader class="p-0">
+              <div class="d-flex align-items-center justify-content-between">
+                <button style="width:100%;display:flex;padding:1rem;" class="btn btn-link m-0" ngbPanelToggle><h5 class="m-0">{{entry.controls.name.value}}</h5></button>
+                <button type="button" class="btn btn-link m-0" (click)="removeItem(i)"><i class="fa fa-trash fa-lg"></i></button>
+              </div>
+            </ng-template>
+            <ng-template ngbPanelContent>
+              <div class="form-group">
+                <label for="nameToEdit">{{ 'name' | translate }}: </label>
+                <div class="input-group">
+                  <input type="text" class="form-control validation-field" name="nameToEdit" formControlName="nameToEdit">
+                  <div class="input-group-append">
+                    <span class="input-group-text">{{ entry.value.extension }}</span>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </ngb-panel>
+        </div>
+      </ngb-accordion>
+  </div>
+  <div class="modal-footer" style="justify-content:space-between;">
+    <button type="button" class="btn btn-outline-dark" (click)="modal.close('close');resetFiles();">Abbrechen</button>
+    <button type="submit" class="btn btn-outline-dark" [disabled]="!uploadFilesForm.valid">Hochladen</button>
+  </div>
+</form>
+</ng-template>
+
+
+<ng-template #edit let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Meta Informationen bearbeiten</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.close('close')" style="outline-style: none;">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+      <label for="folderName" style="text-transform: uppercase;">Name: </label>
+      <div class="input-group">
+        <input class="form-control validation-field" id="docuName" required [(ngModel)]="documentToEditName" placeholder="Filename" type="text">
+        <div class="input-group-append">
+          <span class="input-group-text">{{documentToEditExtension}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer" style="justify-content:space-between;">
+    <button type="button" class="btn btn-outline-dark" (click)="modal.close('close')">Schließen</button>
+    <button type="button" class="btn btn-outline-dark" (click)="putDocument(documentToEdit, true);modal.close('close')">Speichern</button>
+  </div>
+</ng-template>
+
+<ng-template #editFolder let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Ordner bearbeiten</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.close('close')" style="outline-style: none;">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+      <label for="folderName" style="text-transform: uppercase;">Name: </label>
+      <input type="text" class="form-control validation-field" id="folderName" required [(ngModel)]="folderToEditName">
+    </div>
+  </div>
+  <div class="modal-footer" style="justify-content:space-between;">
+    <button type="button" class="btn btn-outline-dark" (click)="modal.close('close')">Schließen</button>
+    <button type="button" class="btn btn-outline-dark" (click)="putDocument(folderToEdit, false);modal.close('close')">Speichern</button>
+  </div>
+</ng-template>
+
+
+
+
+<ng-template #override let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{existingFilesArray.value.length>1 ? 'Dateien bereits vorhanden' : 'Datei bereits vorhanden'}}</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.close('close');resetFiles();" style="outline-style: none;">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <form [formGroup]="existingFilesForm" (ngSubmit)="submitOverride(existingFilesForm.value.files);modal.close('close');" autocomplete="off">
+
+    <div class="modal-body" *ngIf="existingFilesArray.value.length>1">
+
+      <p>Die folgenden Dateien werden überschrieben. Möchten Sie wirklich mit diesen Prozess fortfahren?</p>
+
+      <div class="col-12 p-0 form-group" style="display: flex;flex-direction: column;align-items: flex-end;">
+        <button type="button" class="btn btn-success btn-sm m-0" (click)="confirmAll()" style="background-color:#45C234 !important"><span style="color: #ffffff;">Alle Bestätigen</span></button>
+      </div>
+
+      <ul class="form-group list-group" formArrayName="files">
+        <div *ngFor="let entry of filesFormGroup.controls; let i = index;" style="padding-bottom:1.5rem;">
+          <li class="list-group-item" [formGroupName]="i" style="display: inline-flex;width: 100%;justify-content: space-between;">
+            <span>{{entry.controls.name.value}}</span>
+            <div class="btn-group">
+              <label class="switch" >
+                <input class="switch-input" type="checkbox" formControlName="confirm"/>
+                <span class="switch-label" [attr.data-on]="'Ja'" [attr.data-off]="'Nein'"></span>
+                <span class="switch-handle"></span>
+              </label>
+            </div>
+           </li>
+        </div>
+      </ul>
+
+    </div>
+
+    <div class="modal-body" *ngIf="existingFilesArray.value.length==1">
+
+      <p>Die Datei <span style="font-weight: bold;">{{existingFilesArray.value[0]['name']}}</span> wird überschrieben. Möchten Sie wirklich mit diesen Prozess fortfahren?</p>
+
+    </div>
+    <div class="modal-footer" style="justify-content:space-between" *ngIf="existingFilesArray.value.length>1">
+      <button type="button" class="btn btn-outline-dark" (click)="cancelAll();modal.close('close');">Abbrechen</button>
+      <button type="submit" class="btn btn-outline-dark" [disabled]="!existingFilesForm.valid">Fortfahren</button>
+    </div>
+    <div class="modal-footer" style="justify-content:space-between" *ngIf="existingFilesArray.value.length==1">
+      <button type="button" class="btn btn-outline-dark" (click)="cancelAll();modal.close('close');">Nein, abbrechen</button>
+      <button type="submit" class="btn btn-outline-dark" [disabled]="!existingFilesForm.valid">Ja, überschreiben</button>
+    </div>
+  </form>
+</ng-template>
+
+
+
+<ng-template #delete let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{fileToBeDeleted.name}} löschen</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.close('close')" style="outline-style: none;">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body" *ngIf="fileToBeDeleted.type != 'dir'">
+    Möchten Sie wirklich diese Datei löschen?
+  </div>
+  <div class="modal-body" *ngIf="fileToBeDeleted.type == 'dir'">
+    Möchten Sie wirklich diesen Ordner löschen?<br>
+    Alle Dateien und Ordner in diesem Ordner werden ebenfalls gelöscht.
+  </div>
+  <div class="modal-footer" style="justify-content:space-between;">
+    <button type="button" class="btn btn-outline-dark" (click)="modal.close('close')">Schließen</button>
+    <button type="button" class="btn btn-outline-dark" (click)="deleteFromS3Bucket(fileToBeDeleted, false);modal.close('close')">Löschen</button>
+  </div>
+</ng-template>
+
+<ng-template #create let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Ordner erstellen</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.close('close')" style="outline-style: none;">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+      <ng-template #recursiveList let-node let-prefix="prefix">
+        <div class="tree-item">
+          <div class="col-12">
+            <button type="button" class="btn btn-secondary" *ngIf="prefix==''" (click)="addChild(folders.root)">Ordner  <i class="ft-plus-circle"></i></button>
+            <button type="button" class="btn btn-secondary ml-2" *ngIf="prefix=='' && folders.root.children.length>0" (click)="removeChildren(folders.root)">Alles löschen</button>
+          </div>
+        </div>
+
+        <ng-container *ngFor="let node of node.children; let i = index">
+          <div class="tree-item form-group row">
+            <div class="col-11">
+              <input class="form-control" placeholder="Ordner Name eingeben" type="text" [(ngModel)]="node.name" [ngModelOptions]="{standalone: true}" required>
+            </div>
+            <div class="col-1" style="display:flex;align-items:center;" >
+              <span (click)="remove(node, i, prefix+i)"><i class="ft-minus-circle text-danger"></i></span>
+            </div>
+          </div>
+            <div class="tree-item">
+              <div class="col-12">
+                <button type="button" class="btn btn-secondary" (click)="addChild(node)">Unterordner  <i class="icon-plus"></i></button>
+                <button type="button" class="btn btn-secondary ml-2" (click)="removeChildren(node)" *ngIf="node.children.length>0">Unterordner  <i class="ft-minus-circle"></i></button>
+              </div>
+            </div>
+            <div class="sub-tree form-group" *ngIf="node.children.length">
+              <ng-container
+                *ngTemplateOutlet="recursiveList; context:{ $implicit: node, prefix: prefix + i + '.'   }">
+              </ng-container>
+            </div>
+        </ng-container>
+      </ng-template>
+      <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: folders.root, prefix: '' }"></ng-container>
+    </div>
+  </div>
+  <div class="modal-footer" style="justify-content:space-between;">
+    <button type="button" class="btn btn-outline-dark" (click)="modal.close('close')">Schließen</button>
+    <button type="button" class="btn btn-outline-dark" (click)="createFolder();modal.close('close')">Erstellen</button>
+  </div>
+</ng-template>

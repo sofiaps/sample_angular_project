@@ -1,0 +1,39 @@
+<div #wrapper class="wrapper" [ngClass]="{'nav-collapsed': iscollapsed, 'menu-collapsed': iscollapsed, 'sidebar-sm': isSidebar_sm, 'sidebar-lg': isSidebar_lg}" [dir]="options.direction" id="docWrap">
+  <div #appSidebar appSidebar class="app-sidebar" (toggleHideSidebar)="toggleHideSidebar($event)" [ngClass]="{'hide-sidebar': hideSidebar}" data-active-color="white" [attr.data-background-color]="bgColor" [attr.data-image]="bgImage">
+      <app-sidebar></app-sidebar>
+      <div class="sidebar-background" #sidebarBgImage></div>
+  </div>
+  <app-navbar (toggleHideSidebar)="toggleHideSidebar($event)"></app-navbar>
+  <div class="kanbanHeaders" id="headersKanban" style="display:none;">
+    <div style="width: 100%;padding: 0 30px;">
+      <div style="padding: 0 1.5rem;">
+        <div class="row justify-content-center">
+          <div class="col-4" style="background-color: #f5f7fa;">
+            <h4 class="ml-2 pt-2 mb-0 pb-2 text-bold-500 text-center" data-placement="bottom" data-toggle="tooltip" ngbTooltip="Offen" style="white-space: nowrap;text-overflow: ellipsis;overflow: hidden;">
+            <i class="ft-list mr-1"></i> {{ 'toDo' | translate }}</h4>
+          </div>
+          <div class="col-4" style="background-color: #f5f7fa;">
+            <h4 class="ml-2 pt-2 mb-0 pb-2 text-bold-500 text-center" data-placement="bottom" data-toggle="tooltip" ngbTooltip="In Bearbeitung" style="white-space: nowrap;text-overflow: ellipsis;overflow: hidden;">
+              <i class="ft-trending-up mr-1"></i> {{ 'inProgress' | translate }}</h4>
+          </div>
+          <div class="col-4" style="background-color: #f5f7fa;">
+            <h4 class="ml-2 pt-2 mb-0 pb-2 text-bold-500 text-center" data-placement="bottom" data-toggle="tooltip" ngbTooltip="Abgeschlossen" style="white-space: nowrap;text-overflow: ellipsis;overflow: hidden;">
+              <i class="ft-check-circle mr-1"></i> {{ 'done' | translate }}</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="main-panel">
+    <div class="main-content">
+      <div class="content-wrapper">
+        <div class="container-fluid">
+          <router-outlet></router-outlet>
+        </div>
+      </div>
+    </div>
+    <app-footer></app-footer>
+  </div>
+  <!-- <app-notification-sidebar></app-notification-sidebar> -->
+  <!-- <app-customizer (directionEvent)="getOptions($event)"></app-customizer> -->
+</div>
