@@ -3,7 +3,7 @@
     <p>
       <small class="text-muted">
         <i class="mr-1 icon-info" style="cursor:pointer" ></i>
-        Manage your files with Sample Angular App ! 
+        Manage your files with Sample Angular App !
         Upload with dialog or Drag & Drop, edit your files, create and edit folders and preview your PDF's.
         Files that are being shared through the Portal are saved in the Cloud (using AWS - s3 Buckets).
         The files are not public. Only you can have access to each file shared by/with them.
@@ -88,17 +88,17 @@
                           <td style="vertical-align: middle;">
                             <div style="width:100%;">
                               <div class="input-group m-0">
-                                       <div style="width:100%;">
-                                         <div class="input-group m-0" style="">
-                              <div class="position-relative has-icon-right" style="display: inline-flex;border-bottom: 1px solid #ced4da;border-top: 1px solid #ced4da;">
-                                <input class="form-control" placeholder="Select Date"
-                                       name="dp1" (dateSelect)="onDateSelection1($event);"
-                                       ngbDatepicker #datepicker1="ngbDatepicker" [(ngModel)]="model1"
-                                       [placement]="'bottom'" style="border: 1px solid #ced4da;border-right: none;border-top: none;border-bottom: none;width: 100%;">
-                                <div class="form-control-position" style="display: flex;align-items: center;padding-right: 0.5rem;">
-                                  <i class="ft-x" *ngIf="model1" (click)="resetEntryDate();model1=null"></i>
-                                </div>
-                              </div>
+                                 <div style="width:100%;">
+                                   <div class="input-group m-0" style="display: flex;">
+                                      <div class="position-relative has-icon-right" style="flex:1;display: inline-flex;border-bottom: 1px solid #ced4da;border-top: 1px solid #ced4da;">
+                                        <input class="form-control" placeholder="Select Date"
+                                               name="dp1" (dateSelect)="onDateSelection1($event);"
+                                               ngbDatepicker #datepicker1="ngbDatepicker" [(ngModel)]="model1"
+                                               [placement]="'bottom'" style="border: 1px solid #ced4da;border-right: none;border-top: none;border-bottom: none;width: 100%;">
+                                        <div class="form-control-position" style="display: flex;align-items: center;padding-right: 0.5rem;">
+                                          <i class="ft-x" *ngIf="model1" (click)="resetEntryDate();model1=null"></i>
+                                        </div>
+                                      </div>
                                 <div class="input-group-append">
                                   <button class="btn btn-outline-secondary icon-calendar" style="border-color:#ced4da" (click)="toDateSelected1=false;datepicker1.toggle()" type="button"></button>
                                 </div>

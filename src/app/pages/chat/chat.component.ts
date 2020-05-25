@@ -34,6 +34,8 @@ export class ChatComponent implements OnInit {
     activeChatUserImg: string;
     @ViewChild('messageInput', {static: false}) messageInputRef: ElementRef;
     @ViewChild('chatSidebar', {static: false}) sidebar:ElementRef;
+    @ViewChild('contentOverlay', { static: false }) overlay: ElementRef;
+
 
     messages = new Array();
 
@@ -69,9 +71,14 @@ export class ChatComponent implements OnInit {
       this.socketSubscription = this.websocketHandlerService.messages.subscribe(message => {
         if(message && message.message && message.type=="Chat" && message.message=="New chat message" && message.body.newMessage.room_id!==this.chatRoom){
           let x = this.contactsService.contacts.findIndex(e=>e['id']==message.body.newMessage.user_id);
+
           if(x>-1){
             this.contactsService.contacts[x]['unread'] = 1;
             this.contactsService.contacts[x]['unread_counter']++;
+            this.contactsService.contacts[x]['room_id']=message.body.newMessage.room_id;
+            this.contactsService.contacts[x]['last_msg']=unescape(message.body.newMessage.content);
+            this.contactsService.contacts[x]['last_msg_time']=message.body.newMessage.timestamp;
+            this.contactsService.contacts[x]['last_msg_type']=message.body.newMessage.type;
             this.contactsService.sum['unread'] = 1;
             this.contactsService.sum['unread_counter']++;
           }
@@ -102,9 +109,8 @@ export class ChatComponent implements OnInit {
 
 
     SetActive(event, chatRoom, chatId: string) {
+      this.onContentOverlay();
 
-      console.log(jQuery(event.currentTarget))
-        console.log(jQuery(event.target))
       this.loadingConversation = true;
       this.chatIndex = chatId;
       this.activeContact = this.contactsService.contacts[chatId];
@@ -125,7 +131,7 @@ export class ChatComponent implements OnInit {
         payload['user_id_2'] = this.contactsService.contacts[chatId]['id'];
         this.apiClientService.postAPIObject('chat-room', payload).then(async (response) => {
           if(!response.errorMessage && response.state=='OK'){
-            this.chatRoom = await response['body']['id'];
+            this.chatRoom = await response['body'];
             this.contactsService.contacts[chatId]['room_id']= this.chatRoom;
             this.loadingConversation = false;
           }else{
@@ -141,7 +147,6 @@ export class ChatComponent implements OnInit {
           let param = {};
           param['roomId'] = chatRoom;
         this.apiClientService.getAPIObject('chat-messages', param).then(async (response) => {
-          console.log(response);
           if(!response.errorMessage && response.state=='OK'){
             this.messages = await response.body;
             this.loadingConversation = false;
@@ -411,6 +416,24 @@ export class ChatComponent implements OnInit {
       }else{
         return true;
       }
+    }
+
+
+    onSidebarToggle() {
+      this.renderer.removeClass(this.sidebar.nativeElement, 'd-none');
+      this.renderer.removeClass(this.sidebar.nativeElement, 'd-sm-none');
+      this.renderer.addClass(this.sidebar.nativeElement, 'd-block');
+      this.renderer.addClass(this.sidebar.nativeElement, 'd-sm-block');
+      this.renderer.addClass(this.overlay.nativeElement, 'show');
+    }
+
+    onContentOverlay() {
+      this.renderer.removeClass(this.overlay.nativeElement, 'show');
+      this.renderer.removeClass(this.sidebar.nativeElement, 'd-block');
+      this.renderer.removeClass(this.sidebar.nativeElement, 'd-sm-block');
+      this.renderer.addClass(this.sidebar.nativeElement, 'd-none');
+      this.renderer.addClass(this.sidebar.nativeElement, 'd-sm-none');
+
     }
 
   }

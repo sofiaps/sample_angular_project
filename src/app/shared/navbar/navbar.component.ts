@@ -68,6 +68,7 @@ export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       if(message && message.message && message.type=="Chat" && message.message=="New chat message" && this.router.url != '/chat'){
         let x = this.contactsService.contacts.findIndex(e=>e['id']==message.body.newMessage.user_id);
+        console.log(this.contactsService.contacts)
         if(x>-1){
           this.contactsService.contacts[x]['unread'] = 1;
           this.contactsService.contacts[x]['unread_counter']++;

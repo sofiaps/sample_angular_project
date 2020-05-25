@@ -18,6 +18,7 @@
 </div>
 
 <div class="chat-application" style="position:relative;min-height:300px;">
+  <div #contentOverlay (click)="onContentOverlay()"></div>
   <div [perfectScrollbar] #chatSidebar style="min-height: 100%;position: absolute;" class="chat-sidebar float-left d-none d-sm-none d-md-block d-lg-block">
     <div class="chat-sidebar-content">
       <div class="chat-fixed-search p-2">
@@ -63,10 +64,10 @@
       </div>
     </div>
   </div>
-  <div class="chat-name p-2 bg-white" *ngIf="chatIndex!=undefined">
+  <div class="chat-name p-2 bg-white">
     <div class="media">
-      <span class="chat-app-sidebar-toggle ft-align-justify font-large-1 mr-2 d-none d-block d-sm-block d-md-none"></span>
-      <div class="media-body text-left">
+      <span class="chat-app-sidebar-toggle ft-align-justify font-large-1 mr-2 d-none d-block d-sm-block d-md-none" (click)="onSidebarToggle()"></span>
+      <div class="media-body text-left"  *ngIf="chatIndex!=undefined">
         <img src="assets/img/portrait/medium/avatar.png" width="37" class="rounded-circle mr-1" alt="avatar" />
         <span>{{ activeContact.name }}</span>
       </div>
